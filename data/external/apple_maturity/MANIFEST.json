@@ -1,0 +1,41 @@
+{
+  "dataset_id": "apple-maturity-gfcmdbvw65-v4",
+  "name": "A Multi-Stage, Pixel-Level Annotated Apple Dataset for Precision Agriculture Research",
+  "source": {
+    "repository": "Mendeley Data",
+    "doi": "10.17632/gfcmdbvw65.4",
+    "landing_page": "https://data.mendeley.com/datasets/gfcmdbvw65/4",
+    "download_url": "https://data.mendeley.com/public-api/zip/gfcmdbvw65/download/4",
+    "published": "2026-05-09",
+    "authors": ["Dandan Wang", "Bo Wang"]
+  },
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Wang, Dandan; Wang, Bo (2026), A Multi-Stage, Pixel-Level Annotated Apple Dataset for Precision Agriculture Research, Mendeley Data, V4, doi: 10.17632/gfcmdbvw65.4",
+    "notes": "Preserve attribution, license link, and any changes when redistributing derivatives. Check third-party content before commercial redistribution."
+  },
+  "local_artifacts": {
+    "download_archive": "dataset-20260508.zip",
+    "download_archive_sha256": "d6b82f270d08dd81b9802d8caa5a2d853f1aef7a9d3e19e36966548cfa45638b",
+    "inner_archive_sha256": "049591afd4fc3529aedbd31ef9119f5ec0601ebcb8cbbd4a25b7e883fde147ce",
+    "extracted_root": "dataset/dataset-20260508"
+  },
+  "contents_verified": {
+    "images_total_across_resolutions": 2812,
+    "annotated_images": 1406,
+    "train_images": 1041,
+    "validation_images": 126,
+    "test_images": 239,
+    "resolutions": ["369x277/404x303", "640x480"],
+    "annotation_format": "VIA-compatible JSON with polygon masks",
+    "labels": ["immature apple", "semi-mature apple", "mature apple"]
+  },
+  "project_use": {
+    "status": "research_bootstrap_only",
+    "intended_task": "apple fruit instance segmentation and maturity-stage classification",
+    "production_ready": false,
+    "why_not_production": "The dataset is from an external orchard and does not establish performance for the user's property, camera, cultivar, lighting, season, or agronomic decision. It must not replace local collection and independent evaluation.",
+    "next_gate": "Convert selected annotations to the project schema only after crop/task are confirmed, then evaluate on an independent local field set."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "crop": "preencher cultura única",
+  "task": "preencher variável visual mensurável",
+  "partner": "preencher fazenda ou parceiro do piloto",
+  "protocol_version": "v1",
+  "annotation_owner": "preencher responsável pela referência humana",
+  "baseline": "preencher método e métrica aprovados",
+  "consent_scope": "preencher consentimento e finalidade de uso",
+  "review_protocol": "preencher protocolo de revisão humana",
+  "data_source": "preencher origem e consentimento das imagens",
+  "evaluation_groups": [
+    "preencher propriedade ou campanha independente"
+  ],
+  "extrapolation_allowed": false
+}

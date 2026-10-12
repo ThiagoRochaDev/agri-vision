@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agri Vision · MVP</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #18322a; background: #f4f7f2; }
+    body { margin: 0; } main { max-width: 1100px; margin: auto; padding: 28px 18px 60px; }
+    header { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: 1.8rem; } h2 { margin-top: 0; font-size: 1.1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    section { background: white; border: 1px solid #dce7dd; border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px #18322a0d; }
+    label { display: block; font-size: .86rem; font-weight: 650; margin: 10px 0 4px; }
+    input, textarea, button { box-sizing: border-box; width: 100%; border: 1px solid #b9cdbd; border-radius: 7px; padding: 9px; font: inherit; }
+    button { background: #176b45; color: white; border: 0; cursor: pointer; margin-top: 12px; font-weight: 700; }
+    button.secondary { background: #e7f0e8; color: #176b45; } .status { min-height: 24px; margin: 10px 0; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f1; border-radius: 8px; padding: 10px; max-height: 280px; overflow: auto; }
+    small { color: #55705f; } .ok { color: #176b45; } .error { color: #a72d2d; }
+  </style>
+</head>
+<body>
+<main>
+  <header><div><h1>Agri Vision</h1><small>Campanhas de campo com revisão humana</small></div><span id="health">verificando…</span></header>
+  <section style="margin-bottom:16px"><h2>Acesso da sessão</h2>
+    <label for="api-key">Chave API (não é armazenada)</label><input id="api-key" type="password" placeholder="necessária quando o serviço estiver protegido">
+    <label for="organization-id">Organização</label><input id="organization-id" value="default">
+    <label for="actor-id">Ator</label><input id="actor-id" value="operador-local">
+  </section>
+  <div class="grid">
+    <section><h2>1 · Fazenda</h2>
+      <label for="farm-name">Nome</label><input id="farm-name" value="Fazenda demonstração">
+      <label for="farm-region">Região</label><input id="farm-region" value="SP">
+      <button onclick="createFarm()">Criar fazenda</button><pre id="farm-result"></pre>
+    </section>
+    <section><h2>2 · Talhão</h2>
+      <label for="farm-id">ID da fazenda</label><input id="farm-id">
+      <label for="plot-name">Nome do talhão</label><input id="plot-name" value="Talhão A">
+      <label for="crop">Cultura</label><input id="crop" value="café">
+      <button onclick="createPlot()">Criar talhão</button><pre id="plot-result"></pre>
+    </section>
+    <section><h2>3 · Campanha</h2>
+      <label for="plot-id">ID do talhão</label><input id="plot-id">
+      <label for="period">Período</label><input id="period" value="2026-10">
+      <label for="task">Pergunta mensurável</label><input id="task" value="contagem de frutos">
+      <button onclick="createCampaign()">Criar campanha</button><pre id="campaign-result"></pre>
+      <button class="secondary" onclick="transitionCampaign('collecting')">Iniciar coleta</button>
+      <button class="secondary" onclick="transitionCampaign('review')">Enviar para revisão</button>
+    </section>
+    <section><h2>4 · Amostra</h2>
+      <label for="campaign-id">ID da campanha</label><input id="campaign-id">
+      <label for="sample-image">Imagem (máximo 6 MiB)</label><input id="sample-image" type="file" accept="image/*">
+      <label for="sample-crop">Cultura capturada</label><input id="sample-crop" value="café">
+      <label for="location">GPS (latitude, longitude)</label><input id="location" placeholder="-23.05, -47.05">
+      <button onclick="addSample()">Registrar amostra</button><pre id="sample-result"></pre>
+      <small id="outbox-status">Nenhuma pendência offline conhecida</small>
+      <button class="secondary" onclick="syncOutbox()">Sincronizar pendências</button>
+    </section>
+    <section><h2>5 · Revisão e relatório</h2>
+      <label for="observation-id">ID da observação</label><input id="observation-id">
+      <label for="prediction">Contagem revisada</label><input id="prediction" type="number" min="0" step="1" value="0">
+      <label for="reviewer">Técnico responsável</label><input id="reviewer" value="agrônomo-demo">
+      <button onclick="review()">Salvar revisão</button>
+      <button class="secondary" onclick="runInference()">Executar inferência</button>
+      <button class="secondary" onclick="observations()">Ver observações</button>
+      <button class="secondary" onclick="report()">Abrir relatório do talhão</button><pre id="review-result"></pre>
+      <button class="secondary" onclick="coverage()">Ver cobertura GPS</button>
+    </section>
+  </div>
+  <p class="status" id="status" role="status"></p>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const show = (id, value) => $(id).textContent = JSON.stringify(value, null, 2);
+const MAX_MEDIA_BYTES = 6 * 1024 * 1024;
+const OUTBOX_DB = 'agri-vision-outbox';
+const OUTBOX_STORE = 'samples';
+function openOutbox() { return new Promise((resolve, reject) => { const request = indexedDB.open(OUTBOX_DB, 1); request.onupgradeneeded = () => request.result.createObjectStore(OUTBOX_STORE, { keyPath: 'client_event_id' }); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); }); }
+async function saveOutbox(event) { const db = await openOutbox(); await new Promise((resolve, reject) => { const request = db.transaction(OUTBOX_STORE, 'readwrite').objectStore(OUTBOX_STORE).put(event); request.onsuccess = resolve; request.onerror = () => reject(request.error); }); db.close(); await refreshOutboxStatus(); }
+async function readOutbox() { const db = await openOutbox(); const events = await new Promise((resolve, reject) => { const request = db.transaction(OUTBOX_STORE, 'readonly').objectStore(OUTBOX_STORE).getAll(); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); }); db.close(); return events; }
+async function removeOutbox(ids) { if (!ids.length) return; const db = await openOutbox(); await new Promise((resolve, reject) => { const transaction = db.transaction(OUTBOX_STORE, 'readwrite'); for (const id of ids) transaction.objectStore(OUTBOX_STORE).delete(id); transaction.oncomplete = resolve; transaction.onerror = () => reject(transaction.error); }); db.close(); await refreshOutboxStatus(); }
+async function refreshOutboxStatus() { try { const events = await readOutbox(); $('outbox-status').textContent = events.length ? `${events.length} amostra(s) aguardando sincronização` : 'Nenhuma pendência offline conhecida'; } catch (_) { $('outbox-status').textContent = 'Fila offline indisponível neste navegador'; } }
+async function syncOutbox() { await run(async () => { const events = await readOutbox(); if (!events.length) { $('status').textContent = 'Não há amostras pendentes'; return; } try { const value = await call('/sync-batches', { method: 'POST', body: JSON.stringify({ events }) }); await removeOutbox(value.items.map(item => item.client_event_id).filter(Boolean)); $('status').className = 'status ok'; $('status').textContent = `${value.items.length} amostra(s) sincronizada(s)`; } catch (error) { if (error instanceof TypeError) { $('status').textContent = 'Serviço indisponível; pendências preservadas'; return; } throw error; } }); }
+function toBase64(buffer) { let binary = ''; const bytes = new Uint8Array(buffer); for (const byte of bytes) binary += String.fromCharCode(byte); return btoa(binary); }
+async function imagePayload() {
+  const file = $('sample-image').files[0];
+  if (!file) return { content_hash: crypto.randomUUID(), media_base64: undefined, width: 1280, height: 720 };
+  if (file.size > MAX_MEDIA_BYTES) throw new Error('imagem maior que 6 MiB');
+  const buffer = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  let width = 1280; let height = 720;
+  try { const bitmap = await createImageBitmap(file); width = bitmap.width; height = bitmap.height; bitmap.close(); } catch (_) {}
+  return { content_hash: [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join(''), media_base64: toBase64(buffer), width, height };
+}
+async function call(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', 'X-Organization-ID': $('organization-id').value, 'X-Actor-ID': $('actor-id').value };
+  if ($('api-key').value) headers['X-API-Key'] = $('api-key').value;
+  const response = await fetch(path, { headers, ...options });
+  const value = await response.json(); if (!response.ok) throw new Error(value.error || response.statusText); return value;
+}
+async function run(action) { try { $('status').className = 'status'; return await action(); } catch (error) { $('status').className = 'status error'; $('status').textContent = error.message; } }
+async function createFarm() { await run(async () => { const value = await call('/farms', { method: 'POST', body: JSON.stringify({ name: $('farm-name').value, region: $('farm-region').value }) }); $('farm-id').value = value.id; show('farm-result', value); }); }
+async function createPlot() { await run(async () => { const value = await call('/plots', { method: 'POST', body: JSON.stringify({ farm_id: $('farm-id').value, name: $('plot-name').value, crop: $('crop').value }) }); $('plot-id').value = value.id; show('plot-result', value); }); }
+async function createCampaign() { await run(async () => { const value = await call('/campaigns', { method: 'POST', body: JSON.stringify({ plot_id: $('plot-id').value, protocol_version: 'v1', captured_period: $('period').value, task: $('task').value }) }); $('campaign-id').value = value.id; show('campaign-result', value); }); }
+async function transitionCampaign(status) { await run(async () => { const value = await call('/campaigns/' + $('campaign-id').value + '/transition', { method: 'POST', body: JSON.stringify({ status }) }); show('campaign-result', value); }); }
+async function addSample() { await run(async () => { const coordinates = $('location').value.split(',').map(Number); const image = await imagePayload(); const event = { campaign_id: $('campaign-id').value, client_event_id: 'browser-' + crypto.randomUUID(), content_hash: image.content_hash, media_base64: image.media_base64, capture_metadata: { width: image.width, height: image.height, blur_score: 0.9, crop: $('sample-crop').value, latitude: coordinates[0] || null, longitude: coordinates[1] || null } }; try { const value = await call('/campaigns/' + event.campaign_id + '/samples', { method: 'POST', body: JSON.stringify(event) }); $('observation-id').value = value.observation_id; show('sample-result', value); } catch (error) { if (!(error instanceof TypeError)) throw error; await saveOutbox(event); $('status').className = 'status ok'; $('status').textContent = 'Sem conexão; amostra guardada para sincronização'; } }); }
+async function review() { await run(async () => { const value = await call('/observations/' + $('observation-id').value + '/reviews', { method: 'POST', body: JSON.stringify({ prediction: Number($('prediction').value), note: 'Revisão registrada na interface local', reviewer: $('reviewer').value }) }); show('review-result', value); }); }
+async function runInference() { await run(async () => { show('review-result', await call('/campaigns/' + $('campaign-id').value + '/inference', { method: 'POST' })); }); }
+async function observations() { await run(async () => { show('review-result', await call('/campaigns/' + $('campaign-id').value + '/observations')); }); }
+async function report() { await run(async () => { show('review-result', await call('/plots/' + $('plot-id').value + '/reports')); }); }
+async function coverage() { await run(async () => { show('review-result', await call('/plots/' + $('plot-id').value + '/coverage')); }); }
+call('/health').then(value => { $('health').textContent = '● serviço online'; $('health').className = 'ok'; }).catch(() => { $('health').textContent = '● serviço indisponível'; $('health').className = 'error'; });
+refreshOutboxStatus();
+window.addEventListener('online', syncOutbox);
+</script>
+</body>
+</html>

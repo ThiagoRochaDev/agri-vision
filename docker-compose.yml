@@ -1,0 +1,27 @@
+services:
+  agri-vision:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    environment:
+      AGRI_VISION_HOST: 0.0.0.0
+      AGRI_VISION_PORT: 8765
+      AGRI_VISION_DATABASE: /data/agri_vision.sqlite3
+      AGRI_VISION_MEDIA_DIR: /data/media
+      AGRI_VISION_API_KEY: ${AGRI_VISION_API_KEY:?configure AGRI_VISION_API_KEY}
+      AGRI_VISION_INFERENCE_URL: ${AGRI_VISION_INFERENCE_URL:-}
+      AGRI_VISION_INFERENCE_API_KEY: ${AGRI_VISION_INFERENCE_API_KEY:-}
+      AGRI_VISION_INFERENCE_MODEL_VERSION: ${AGRI_VISION_INFERENCE_MODEL_VERSION:-external-unconfigured}
+      AGRI_VISION_INFERENCE_TIMEOUT: ${AGRI_VISION_INFERENCE_TIMEOUT:-10}
+    volumes:
+      - agri_vision_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  agri_vision_data:

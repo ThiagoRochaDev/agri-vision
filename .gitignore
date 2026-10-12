@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+media/
+backups/
+data/external/*/dataset-*.zip
+data/external/*/outer/
+data/external/*/dataset/
+data/external/*/*.jsonl
+data/external/*/yolo/
+data/external/*/runs/
+.pytest_cache/
+data/external/*/weights/

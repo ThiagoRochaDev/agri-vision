@@ -1,0 +1,25 @@
+name: agri-vision-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile
+        run: python -m compileall -q agri_vision run.py backup.py restore.py retention.py production_check.py export_dataset.py pilot_check.py validate_dataset.py external_dataset_to_jsonl.py external_dataset_to_yolo.py train_research_baseline.py
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build container image
+        run: docker build --tag agri-vision:ci .

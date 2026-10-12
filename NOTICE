@@ -1,0 +1,5 @@
+Agri Vision — TGR Technology
+
+O código deste repositório é distribuído sob Apache License 2.0.
+
+Os datasets e componentes externos possuem licenças próprias. O dataset público de maçãs está identificado no manifesto em data/external/apple_maturity/MANIFEST.json. O baseline experimental usa runtime e pesos Ultralytics, sujeitos a AGPL-3.0 ou licença Enterprise; isso precisa ser resolvido antes de qualquer uso comercial.
