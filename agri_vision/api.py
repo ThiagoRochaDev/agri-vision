@@ -93,6 +93,9 @@ def handler_for(store: Store, api_key: str | None = None, metrics: Metrics | Non
             self.send_header("Content-Length", str(length))
             self.send_header("X-Request-ID", self._request_id())
             self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
             self.send_header("Cache-Control", "no-store")
 
         def _send(self, status: int, payload: dict) -> None:

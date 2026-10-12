@@ -64,6 +64,8 @@ O MVP ainda não treina nem executa um detector. O endpoint de inferência usa u
 ## Operação
 
 O checklist operacional está em [docs/OPERATIONS.md](docs/OPERATIONS.md).
+O deploy com TLS automático está em [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md);
+use `docker-compose.production.yml` somente com domínio, DNS e secrets reais.
 O contrato do worker externo está em [docs/MODEL_WORKER.md](docs/MODEL_WORKER.md).
 O protocolo agronômico que deve ser aprovado antes do modelo está em [docs/PILOT_PROTOCOL.md](docs/PILOT_PROTOCOL.md).
 Os insumos públicos baixados e seus limites estão em [docs/EXTERNAL_DATASETS.md](docs/EXTERNAL_DATASETS.md), com o manifesto em `data/external/apple_maturity/MANIFEST.json`.

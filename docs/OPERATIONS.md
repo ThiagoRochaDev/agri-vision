@@ -27,6 +27,7 @@
 8. Correlacionar incidentes pelo header `X-Request-ID`, presente nas respostas e nos logs de acesso.
 9. Usar `docker-compose.yml` apenas com `AGRI_VISION_API_KEY` fornecida pelo secret store, nunca com a chave do exemplo.
 10. Executar `production_check.py --api-key "$AGRI_VISION_API_KEY"` após iniciar uma nova versão e antes de liberar tráfego; o check falha se a chave não for fornecida e confirma bloqueio sem chave e acesso autorizado. Use `--allow-unauthenticated` somente para desenvolvimento local.
+11. Para produção com domínio, use `docker-compose.yml` junto com `docker-compose.production.yml`; o Caddy termina TLS e a porta interna `8765` não deve ser liberada no firewall.
 
 ## Backup e recuperação
 
