@@ -72,6 +72,8 @@ O baseline experimental e suas métricas estão em [docs/MODEL_BASELINE.md](docs
 O gate executável do piloto usa [docs/PILOT_CONFIG.example.json](docs/PILOT_CONFIG.example.json) e pode ser validado com `python pilot_check.py caminho\para\pilot-config.json`.
 O estado dos critérios de aceite está em [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
 O manual do operador está em [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+As pendências cruzadas com o relatório TGR e os bloqueios externos estão em
+[docs/REPORT_PENDING.md](docs/REPORT_PENDING.md).
 
 As configurações `AGRI_VISION_HOST`, `AGRI_VISION_PORT`, `AGRI_VISION_DATABASE` e `AGRI_VISION_MEDIA_DIR` podem ser fornecidas por ambiente. Para uma cópia consistente:
 

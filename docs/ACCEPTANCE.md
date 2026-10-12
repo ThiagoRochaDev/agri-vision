@@ -23,3 +23,10 @@
 6. Reexecutar T01 com evidência datada, responsável, revisão de código/modelo e decisão agronômica.
 
 Enquanto o primeiro gate de modelo não for concluído, o worker permanece em `pending_model` e nenhum resultado sintético é produzido.
+
+## Pendências externas
+
+O quadro consolidado de decisões, dependências de dados, licença do modelo,
+infraestrutura e autorização de publicação está em
+[`docs/REPORT_PENDING.md`](REPORT_PENDING.md). Itens de outros produtos citados no
+relatório TGR não são considerados evidência de aceite deste projeto.
