@@ -124,3 +124,4 @@ Para uma checagem local sem autenticação, use `--allow-unauthenticated` explic
 O repositório segue a convenção dos projetos TGR: documentação de instalação, operação, segurança, contribuição e decisões técnicas ficam versionadas junto do código. O dataset, as imagens, os pesos e os artefatos de treino são insumos externos ignorados pelo Git; sua procedência e licença ficam nos manifestos e em `NOTICE`.
 
 O baseline de maçãs é experimental. Antes de usar o sistema com uma propriedade real, preencha e aprove `docs/PILOT_PROTOCOL.md`, colete dados locais com consentimento, crie um grupo independente de avaliação e resolva a licença do runtime/modelo.
+O pipeline de produtos está documentado em [docs/PRODUCT_BASELINE.md](docs/PRODUCT_BASELINE.md). Ele usa SKU-110K apenas como benchmark de pesquisa; não é uma autorização para uso comercial.

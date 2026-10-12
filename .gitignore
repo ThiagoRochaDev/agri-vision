@@ -11,3 +11,5 @@ data/external/*/yolo/
 data/external/*/runs/
 .pytest_cache/
 data/external/*/weights/
+data/external/sku110k/
+*.pt
